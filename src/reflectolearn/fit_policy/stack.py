@@ -139,8 +139,12 @@ def counts(stack: Stack, q: np.ndarray, scale: float) -> np.ndarray:
 
 # ------------------------------------------------------------------ fit quality
 def deviance_terms(lam: np.ndarray, y: np.ndarray) -> np.ndarray:
-    """Poisson deviance per point, zero counts included."""
-    return 2.0 * (lam - y + xlogy(y, y / lam))
+    """Poisson deviance per point, zero counts included.
+
+    Clamped at 0, its exact lower bound: for lam within ~1e-8 (relative) of y, rounding leaves an
+    error of order y * 1e-16 that can be negative, and the Poisson residual's sqrt would be NaN (#43).
+    """
+    return np.maximum(2.0 * (lam - y + xlogy(y, y / lam)), 0.0)
 
 
 def deviance(lam: np.ndarray, y: np.ndarray) -> float:

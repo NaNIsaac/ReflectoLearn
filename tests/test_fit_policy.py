@@ -66,6 +66,25 @@ def test_poisson_residuals_and_bic():
     assert st.aic(100.0, 2) == pytest.approx(120.0)
 
 
+def test_poisson_deviance_is_never_negative_near_lam_equal_y():
+    y = np.repeat([1e6, 3e5, 4e4, 7.0], 4)
+    lam = y * (1 + np.tile([1e-9, -1e-9, 3e-10, -3e-10], 4))
+    unclamped = 2.0 * (lam - y + y * np.log(y / lam))
+    assert unclamped.min() < 0  # the rounding case of #43
+    assert np.all(st.deviance_terms(lam, y) >= 0)
+    assert np.all(np.isfinite(st.residuals("poisson", lam, y, 1.0)))
+    assert np.all(np.isfinite(st.residual_jacobian("poisson", lam, y, 1.0, np.ones((16, 2)))))
+
+
+def test_poisson_fit_starts_where_the_model_rounds_to_the_counts():
+    q = st.q_grid()
+    y = st.counts(TRILAYER, q, 1e6) * (1 + 1e-9)
+    free = np.ones(len(TRILAYER.vector()), dtype=bool)
+    fitted, nfev, _, _ = st.fit(TRILAYER, free, q, y, 1e6, "poisson", 5)
+    assert nfev >= 1
+    assert st.deviance(st.counts(fitted, q, 1e6), y) < 1e-6
+
+
 @pytest.mark.parametrize("loss", ["log", "raw", "poisson"])
 def test_residual_jacobian_matches_finite_differences(loss):
     rng = np.random.default_rng(1)
