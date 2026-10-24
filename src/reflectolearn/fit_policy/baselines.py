@@ -78,6 +78,74 @@ def data_start(start: Stack, q: np.ndarray, y: np.ndarray, scale: float) -> Stac
     return st.estimate_d(st.estimate_rho(start, q, y), q, y, scale)
 
 
+CV_FINAL_FIT = 100
+
+
+def inner_full_fit(
+    start: Stack,
+    extra: np.ndarray,
+    q: np.ndarray,
+    y: np.ndarray,
+    scale: float,
+    fit_mask: np.ndarray,
+    *,
+    q_ho=None,
+    y_ho=None,
+    budget: int = BUDGET,
+) -> dict:
+    """Cv (X2D.md section 4, amendment 1b and 1h): C on the training points outside the inner
+    block, start estimates included, with (budget - 100) / L_MAX evaluations per L; the L with the
+    lowest inner-block deviance is refit on all training points with one Poisson fit(100), A1v's
+    step-9 refit, and returned."""
+    qf, yf = q[fit_mask], y[fit_mask]
+    top = data_start(start, qf, yf, scale)
+    per_l = (budget - CV_FINAL_FIT) // L_MAX
+    fits = []
+    for L in range(1, L_MAX + 1):
+        stack = Stack(np.vstack([top.layers, extra[: L - 1]]), top.instr.copy())
+        fits.append(st.fit(stack, np.ones(stack.n_params, bool), qf, yf, scale, "poisson", per_l))
+    inner = [st.deviance(st.counts(f[0], q[~fit_mask], scale), y[~fit_mask]) for f in fits]
+    chosen = int(np.argmin(inner))
+    final = st.fit(
+        fits[chosen][0],
+        np.ones(fits[chosen][0].n_params, bool),
+        q,
+        y,
+        scale,
+        "poisson",
+        CV_FINAL_FIT,
+    )
+    return _score(final[0], q, y, scale, q_ho, y_ho) | {
+        "evaluations": sum(f[1] for f in fits) + final[1],
+        "jacobians": sum(f[2] for f in fits) + final[2],
+        "capped": fits[chosen][3] == 0,
+        "capped_by_L": [f[3] == 0 for f in fits],
+        "inner_by_L": inner,
+    }
+
+
+def truth_fit(
+    truth: Stack,
+    q: np.ndarray,
+    y: np.ndarray,
+    scale: float,
+    *,
+    q_ho=None,
+    y_ho=None,
+    budget: int = BUDGET,
+) -> dict:
+    """TF (X2D.md section 4, diagnostic): the truth as the start, every parameter free, Poisson,
+    one fit with max_nfev = budget, the fit returned."""
+    fitted, nfev, njev, status = st.fit(
+        truth, np.ones(truth.n_params, bool), q, y, scale, "poisson", budget
+    )
+    return _score(fitted, q, y, scale, q_ho, y_ho) | {
+        "evaluations": nfev,
+        "jacobians": njev,
+        "capped": status == 0,
+    }
+
+
 def oracle_fit(
     start: Stack,
     extra: np.ndarray,

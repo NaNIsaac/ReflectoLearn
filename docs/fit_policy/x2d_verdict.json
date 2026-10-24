@@ -1,0 +1,518 @@
+{
+ "summary": {
+  "commit": "690a18bf2478202ef956746b7739375a720835e2",
+  "replication": "partial",
+  "hypotheses": {
+   "H1": "refuted",
+   "H2": "supported",
+   "H3": "refuted",
+   "H4": "refuted"
+  },
+  "cause": "H2",
+  "primary_A1mk_cells": 2,
+  "secondary_passing": [
+   "A1m",
+   "A1k"
+  ],
+  "verdict": "primary passes: confirmation run on seed root 20261026; X2c stays unregistered"
+ },
+ "replication": {
+  "status": "partial",
+  "cells": {
+   "n2_s0": {
+    "rule3_fails": false,
+    "E_A1": 9,
+    "A1_vs_C": {
+     "truths": 16,
+     "bic_wins": 15,
+     "bic_losses": 1,
+     "bic_ties": 0,
+     "sign_p": 0.0002593994140625,
+     "ho_wins": 15,
+     "ho_losses": 1,
+     "beats": true,
+     "episodes": 64,
+     "episode_bic_wins": 54,
+     "episode_bic_wins_same_L": 18
+    }
+   },
+   "n2_s1": {
+    "rule3_fails": true,
+    "E_A1": 8,
+    "A1_vs_C": {
+     "truths": 16,
+     "bic_wins": 14,
+     "bic_losses": 2,
+     "bic_ties": 0,
+     "sign_p": 0.0020904541015625,
+     "ho_wins": 13,
+     "ho_losses": 3,
+     "beats": false,
+     "episodes": 64,
+     "episode_bic_wins": 52,
+     "episode_bic_wins_same_L": 16
+    }
+   },
+   "n3_s0": {
+    "rule3_fails": false,
+    "E_A1": 12,
+    "A1_vs_C": {
+     "truths": 16,
+     "bic_wins": 16,
+     "bic_losses": 0,
+     "bic_ties": 0,
+     "sign_p": 1.52587890625e-05,
+     "ho_wins": 15,
+     "ho_losses": 1,
+     "beats": true,
+     "episodes": 64,
+     "episode_bic_wins": 59,
+     "episode_bic_wins_same_L": 33
+    }
+   },
+   "n3_s1": {
+    "rule3_fails": true,
+    "E_A1": 13,
+    "A1_vs_C": {
+     "truths": 16,
+     "bic_wins": 16,
+     "bic_losses": 0,
+     "bic_ties": 0,
+     "sign_p": 1.52587890625e-05,
+     "ho_wins": 13,
+     "ho_losses": 3,
+     "beats": false,
+     "episodes": 64,
+     "episode_bic_wins": 57,
+     "episode_bic_wins_same_L": 35
+    }
+   }
+  }
+ },
+ "hypotheses": {
+  "H1": {
+   "decisions_unmatched_accept": 632,
+   "matched_reject_frac": 0.015822784810126583,
+   "sign_tests": {
+    "n2_s0": {
+     "for": 0,
+     "against": 0,
+     "p": 1.0,
+     "holds": false
+    },
+    "n2_s1": {
+     "for": 0,
+     "against": 0,
+     "p": 1.0,
+     "holds": false
+    },
+    "n3_s0": {
+     "for": 0,
+     "against": 0,
+     "p": 1.0,
+     "holds": false
+    },
+    "n3_s1": {
+     "for": 1,
+     "against": 0,
+     "p": 0.5,
+     "holds": false
+    }
+   },
+   "grade": "refuted"
+  },
+  "H2": {
+   "overshooting_truths_counted": 42,
+   "left_out_no_true_l_state": 0,
+   "frac_above_margin": 1.0,
+   "E_A1o": {
+    "n2_s0": 0,
+    "n2_s1": 0,
+    "n3_s0": 0,
+    "n3_s1": 0
+   },
+   "grade": "supported"
+  },
+  "H3": {
+   "TF_heldout_losses": {
+    "n2_s0": 0.0,
+    "n2_s1": 0.0,
+    "n3_s0": 0.0,
+    "n3_s1": 0.0
+   },
+   "TF_above_noise_mean_2s": {
+    "n2_s0": 1,
+    "n2_s1": 0,
+    "n3_s0": 2,
+    "n3_s1": 0
+   },
+   "grade": "refuted"
+  },
+  "H4": {
+   "A1_overshooting_episodes": 168,
+   "off_kept_path_frac": 0.0,
+   "sign_tests": {
+    "n2_s0": {
+     "for": 0,
+     "against": 0,
+     "p": 1.0,
+     "holds": false
+    },
+    "n2_s1": {
+     "for": 0,
+     "against": 0,
+     "p": 1.0,
+     "holds": false
+    },
+    "n3_s0": {
+     "for": 0,
+     "against": 0,
+     "p": 1.0,
+     "holds": false
+    },
+    "n3_s1": {
+     "for": 0,
+     "against": 0,
+     "p": 1.0,
+     "holds": false
+    }
+   },
+   "grade": "refuted"
+  }
+ },
+ "primary": {
+  "n2_s0": {
+   "C": {
+    "truths": 16,
+    "bic_wins": 15,
+    "bic_losses": 1,
+    "bic_ties": 0,
+    "sign_p": 0.0002593994140625,
+    "ho_wins": 15,
+    "ho_losses": 1,
+    "beats": true,
+    "episodes": 64,
+    "episode_bic_wins": 54,
+    "episode_bic_wins_same_L": 18
+   },
+   "beats": true
+  },
+  "n2_s1": {
+   "C": {
+    "truths": 16,
+    "bic_wins": 14,
+    "bic_losses": 2,
+    "bic_ties": 0,
+    "sign_p": 0.0020904541015625,
+    "ho_wins": 13,
+    "ho_losses": 3,
+    "beats": false,
+    "episodes": 64,
+    "episode_bic_wins": 54,
+    "episode_bic_wins_same_L": 16
+   },
+   "beats": false
+  },
+  "n3_s0": {
+   "C": {
+    "truths": 16,
+    "bic_wins": 16,
+    "bic_losses": 0,
+    "bic_ties": 0,
+    "sign_p": 1.52587890625e-05,
+    "ho_wins": 15,
+    "ho_losses": 1,
+    "beats": true,
+    "episodes": 64,
+    "episode_bic_wins": 59,
+    "episode_bic_wins_same_L": 33
+   },
+   "beats": true
+  },
+  "n3_s1": {
+   "C": {
+    "truths": 16,
+    "bic_wins": 16,
+    "bic_losses": 0,
+    "bic_ties": 0,
+    "sign_p": 1.52587890625e-05,
+    "ho_wins": 13,
+    "ho_losses": 3,
+    "beats": false,
+    "episodes": 64,
+    "episode_bic_wins": 57,
+    "episode_bic_wins_same_L": 33
+   },
+   "beats": false
+  }
+ },
+ "secondary": {
+  "A1v": {
+   "n2_s0": {
+    "C": {
+     "truths": 16,
+     "bic_wins": 8,
+     "bic_losses": 8,
+     "bic_ties": 0,
+     "sign_p": 0.5981903076171875,
+     "ho_wins": 12,
+     "ho_losses": 4,
+     "beats": false,
+     "episodes": 64,
+     "episode_bic_wins": 29,
+     "episode_bic_wins_same_L": 4
+    },
+    "Cv": {
+     "truths": 16,
+     "bic_wins": 8,
+     "bic_losses": 6,
+     "bic_ties": 2,
+     "sign_p": 0.395263671875,
+     "ho_wins": 11,
+     "ho_losses": 2,
+     "beats": false,
+     "episodes": 64,
+     "episode_bic_wins": 30,
+     "episode_bic_wins_same_L": 3
+    },
+    "beats": false
+   },
+   "n2_s1": {
+    "C": {
+     "truths": 16,
+     "bic_wins": 9,
+     "bic_losses": 7,
+     "bic_ties": 0,
+     "sign_p": 0.4018096923828125,
+     "ho_wins": 11,
+     "ho_losses": 5,
+     "beats": false,
+     "episodes": 64,
+     "episode_bic_wins": 34,
+     "episode_bic_wins_same_L": 5
+    },
+    "Cv": {
+     "truths": 16,
+     "bic_wins": 9,
+     "bic_losses": 5,
+     "bic_ties": 2,
+     "sign_p": 0.21197509765625,
+     "ho_wins": 11,
+     "ho_losses": 3,
+     "beats": false,
+     "episodes": 64,
+     "episode_bic_wins": 36,
+     "episode_bic_wins_same_L": 7
+    },
+    "beats": false
+   },
+   "n3_s0": {
+    "C": {
+     "truths": 16,
+     "bic_wins": 4,
+     "bic_losses": 12,
+     "bic_ties": 0,
+     "sign_p": 0.9893646240234375,
+     "ho_wins": 11,
+     "ho_losses": 5,
+     "beats": false,
+     "episodes": 64,
+     "episode_bic_wins": 20,
+     "episode_bic_wins_same_L": 11
+    },
+    "Cv": {
+     "truths": 16,
+     "bic_wins": 8,
+     "bic_losses": 8,
+     "bic_ties": 0,
+     "sign_p": 0.5981903076171875,
+     "ho_wins": 10,
+     "ho_losses": 6,
+     "beats": false,
+     "episodes": 64,
+     "episode_bic_wins": 37,
+     "episode_bic_wins_same_L": 10
+    },
+    "beats": false
+   },
+   "n3_s1": {
+    "C": {
+     "truths": 16,
+     "bic_wins": 6,
+     "bic_losses": 10,
+     "bic_ties": 0,
+     "sign_p": 0.8949432373046875,
+     "ho_wins": 13,
+     "ho_losses": 3,
+     "beats": false,
+     "episodes": 64,
+     "episode_bic_wins": 25,
+     "episode_bic_wins_same_L": 7
+    },
+    "Cv": {
+     "truths": 16,
+     "bic_wins": 7,
+     "bic_losses": 6,
+     "bic_ties": 3,
+     "sign_p": 0.5,
+     "ho_wins": 8,
+     "ho_losses": 4,
+     "beats": false,
+     "episodes": 64,
+     "episode_bic_wins": 31,
+     "episode_bic_wins_same_L": 4
+    },
+    "beats": false
+   }
+  },
+  "A1m": {
+   "n2_s0": {
+    "C": {
+     "truths": 16,
+     "bic_wins": 15,
+     "bic_losses": 1,
+     "bic_ties": 0,
+     "sign_p": 0.0002593994140625,
+     "ho_wins": 15,
+     "ho_losses": 1,
+     "beats": true,
+     "episodes": 64,
+     "episode_bic_wins": 54,
+     "episode_bic_wins_same_L": 18
+    },
+    "beats": true
+   },
+   "n2_s1": {
+    "C": {
+     "truths": 16,
+     "bic_wins": 14,
+     "bic_losses": 2,
+     "bic_ties": 0,
+     "sign_p": 0.0020904541015625,
+     "ho_wins": 13,
+     "ho_losses": 3,
+     "beats": false,
+     "episodes": 64,
+     "episode_bic_wins": 54,
+     "episode_bic_wins_same_L": 16
+    },
+    "beats": false
+   },
+   "n3_s0": {
+    "C": {
+     "truths": 16,
+     "bic_wins": 16,
+     "bic_losses": 0,
+     "bic_ties": 0,
+     "sign_p": 1.52587890625e-05,
+     "ho_wins": 15,
+     "ho_losses": 1,
+     "beats": true,
+     "episodes": 64,
+     "episode_bic_wins": 59,
+     "episode_bic_wins_same_L": 33
+    },
+    "beats": true
+   },
+   "n3_s1": {
+    "C": {
+     "truths": 16,
+     "bic_wins": 16,
+     "bic_losses": 0,
+     "bic_ties": 0,
+     "sign_p": 1.52587890625e-05,
+     "ho_wins": 13,
+     "ho_losses": 3,
+     "beats": false,
+     "episodes": 64,
+     "episode_bic_wins": 57,
+     "episode_bic_wins_same_L": 33
+    },
+    "beats": false
+   }
+  },
+  "A1k": {
+   "n2_s0": {
+    "C": {
+     "truths": 16,
+     "bic_wins": 15,
+     "bic_losses": 1,
+     "bic_ties": 0,
+     "sign_p": 0.0002593994140625,
+     "ho_wins": 15,
+     "ho_losses": 1,
+     "beats": true,
+     "episodes": 64,
+     "episode_bic_wins": 54,
+     "episode_bic_wins_same_L": 18
+    },
+    "beats": true
+   },
+   "n2_s1": {
+    "C": {
+     "truths": 16,
+     "bic_wins": 14,
+     "bic_losses": 2,
+     "bic_ties": 0,
+     "sign_p": 0.0020904541015625,
+     "ho_wins": 13,
+     "ho_losses": 3,
+     "beats": false,
+     "episodes": 64,
+     "episode_bic_wins": 52,
+     "episode_bic_wins_same_L": 16
+    },
+    "beats": false
+   },
+   "n3_s0": {
+    "C": {
+     "truths": 16,
+     "bic_wins": 16,
+     "bic_losses": 0,
+     "bic_ties": 0,
+     "sign_p": 1.52587890625e-05,
+     "ho_wins": 15,
+     "ho_losses": 1,
+     "beats": true,
+     "episodes": 64,
+     "episode_bic_wins": 59,
+     "episode_bic_wins_same_L": 33
+    },
+    "beats": true
+   },
+   "n3_s1": {
+    "C": {
+     "truths": 16,
+     "bic_wins": 16,
+     "bic_losses": 0,
+     "bic_ties": 0,
+     "sign_p": 1.52587890625e-05,
+     "ho_wins": 13,
+     "ho_losses": 3,
+     "beats": false,
+     "episodes": 64,
+     "episode_bic_wins": 57,
+     "episode_bic_wins_same_L": 35
+    },
+    "beats": false
+   }
+  }
+ },
+ "guards": {
+  "random_floor_cells": 4,
+  "reward_alignment": {
+   "n2_s0": {
+    "only_c": 1,
+    "only_a": 25,
+    "p": 0.9999999850988388,
+    "misaligned": false
+   },
+   "n3_s0": {
+    "only_c": 0,
+    "only_a": 16,
+    "p": 1.0,
+    "misaligned": false
+   }
+  }
+ }
+}

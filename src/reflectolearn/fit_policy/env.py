@@ -6,12 +6,18 @@ fit consumes evaluations from the episode's budget; the episode keeps the lowest
 seen, which is the returned model. `FitEnv.fork` makes a copy of the state that shares the episode
 (budget and best state), for scripted protocols that try candidates (amendment 2).
 
+X2d (X2D.md section 4) adds two options that leave the default unchanged. With `kept_path`, `revert`
+and the returned model use the lowest-BIC state created on this env's own lineage (itself and the
+forks it was made from), not the episode-wide best. With `fit_mask`, fits, BIC and every quantity a
+policy reads use only the masked training points; the rest (A1v's inner block) is scored separately.
+
 Held-out points are stored on the episode for the terminal reward and the final score only; nothing
 a policy reads (observation, BIC, residual features) uses them.
 """
 
 from __future__ import annotations
 
+import itertools
 import math
 from dataclasses import dataclass, field
 
@@ -49,6 +55,7 @@ def _actions() -> tuple[Action, ...]:
 ACTIONS = _actions()
 ACTION_INDEX = {a: i for i, a in enumerate(ACTIONS)}
 LAYER_CHANGES = ("add", "merge", "split", "revert")
+_ENV_IDS = itertools.count()
 
 
 @dataclass
@@ -57,13 +64,16 @@ class FitState:
     open_layers: np.ndarray  # (L, 3) bool, LAYER_KEYS order
     open_instr: np.ndarray  # (3,) bool, INSTR_GROUPS order
     loss: str = "log"
+    origin: int = -1  # id of the env whose action created this state
 
     def free_mask(self) -> np.ndarray:
         """Bool mask in Stack.vector() order: layers, then i0 (always), bkg, offset, dq."""
         return np.concatenate([self.open_layers.ravel(), [True], self.open_instr])
 
     def copy(self) -> FitState:
-        return FitState(self.stack, self.open_layers.copy(), self.open_instr.copy(), self.loss)
+        return FitState(
+            self.stack, self.open_layers.copy(), self.open_instr.copy(), self.loss, self.origin
+        )
 
 
 @dataclass
@@ -82,6 +92,7 @@ class Episode:
     best_bic: float = math.inf
     kiessig: float = field(default=math.nan)
     qc_data: float = field(default=math.nan)
+    decisions: list = field(default_factory=list)  # X2d A1m step 7: [L, dBIC unmatched, matched]
 
 
 class FitEnv:
@@ -96,12 +107,26 @@ class FitEnv:
         y_ho: np.ndarray | None = None,
         budget: int = BUDGET,
         max_actions: int = MAX_ACTIONS,
+        kept_path: bool = False,
+        fit_mask: np.ndarray | None = None,
     ):
         self.episode = Episode(q, y, scale, q_ho, y_ho, budget)
         self.episode.qc_data = st.critical_q(q, y)
         self.max_actions = max_actions
+        self.kept_path = kept_path
+        self.fit_mask = None if fit_mask is None else np.asarray(fit_mask, bool)
+        self.uid = next(_ENV_IDS)
+        self.lineage = frozenset({self.uid})
+        self.path_best: FitState | None = None
+        self.path_best_bic = math.inf
+        self.path_best_all: FitState | None = None
+        self.path_best_all_bic = math.inf
+        self.history: list[tuple[int, int, float]] = []  # (origin, L, deviance on all training)
         self.state = FitState(
-            start.clipped(), np.zeros((start.n_layers, 3), bool), np.zeros(len(INSTR_GROUPS), bool)
+            start.clipped(),
+            np.zeros((start.n_layers, 3), bool),
+            np.zeros(len(INSTR_GROUPS), bool),
+            origin=self.uid,
         )
         top_rho = start.layers[0, 2]
         self.episode.kiessig = st.kiessig_thickness(q, y, scale, top_rho, st.KIESSIG_RANGE)
@@ -113,11 +138,12 @@ class FitEnv:
     # ------------------------------------------------------------ shared data
     @property
     def q(self) -> np.ndarray:
-        return self.episode.q
+        """The points fits and policies see: all training points, or the fit mask's."""
+        return self.episode.q if self.fit_mask is None else self.episode.q[self.fit_mask]
 
     @property
     def y(self) -> np.ndarray:
-        return self.episode.y
+        return self.episode.y if self.fit_mask is None else self.episode.y[self.fit_mask]
 
     @property
     def scale(self) -> float:
@@ -138,17 +164,40 @@ class FitEnv:
         other.__dict__ |= self.__dict__
         other.state = self.state.copy()
         other.trace = list(self.trace)
+        other.history = list(self.history)
+        other.uid = next(_ENV_IDS)
+        other.lineage = self.lineage | {other.uid}
         return other
+
+    def use_all_points(self) -> None:
+        """Drop the fit mask (A1v step 9: the inner block rejoins the fits)."""
+        self.fit_mask = None
+        self._evaluate()
 
     # ------------------------------------------------------------ quality
     def _evaluate(self) -> None:
         s = self.state.stack
-        self.lam = st.counts(s, self.q, self.scale)
-        self.dev = st.deviance(self.lam, self.y)
+        if self.fit_mask is None:
+            self.lam = st.counts(s, self.q, self.scale)
+            self.dev = st.deviance(self.lam, self.y)
+            self.dev_all, self.dev_inner = self.dev, math.nan
+        else:
+            lam_all = st.counts(s, self.episode.q, self.scale)
+            self.lam = lam_all[self.fit_mask]
+            self.dev = st.deviance(self.lam, self.y)
+            self.dev_all = st.deviance(lam_all, self.episode.y)
+            self.dev_inner = st.deviance(lam_all[~self.fit_mask], self.episode.y[~self.fit_mask])
         self.bic = st.bic(self.dev, s.n_layers, len(self.q))
+        self.bic_all = st.bic(self.dev_all, s.n_layers, len(self.episode.q))
         if self.bic < self.episode.best_bic:
             self.episode.best_bic = self.bic
             self.episode.best = self.state.copy()
+        if self.state.origin in self.lineage:
+            if self.bic < self.path_best_bic:
+                self.path_best_bic, self.path_best = self.bic, self.state.copy()
+            if self.bic_all < self.path_best_all_bic:
+                self.path_best_all_bic, self.path_best_all = self.bic_all, self.state.copy()
+        self.history.append((self.state.origin, s.n_layers, self.dev_all))
 
     def excess(self) -> float:
         """(D - E[D]) / SD[D] at the current model (protocol A step 7)."""
@@ -187,9 +236,21 @@ class FitEnv:
             case ("estimate_rho",) | ("estimate_d",) | ("stop",):
                 return True
             case ("revert",):
-                best = self.episode.best
-                return best is not None and not _same_stack(best.stack, s.stack)
+                target = self._revert_target()
+                return target is not None and not _same_stack(target.stack, s.stack)
         raise ValueError(action)
+
+    def _revert_target(self) -> FitState | None:
+        """The episode-wide best, or with kept_path the best on this env's lineage."""
+        return self.path_best if self.kept_path else self.episode.best
+
+    def returned(self) -> FitState:
+        """The returned model: the episode-wide lowest BIC (DESIGN 4.4), or with kept_path the
+        lowest BIC on all training points among the states of this env's lineage."""
+        if self.kept_path:
+            assert self.path_best_all is not None
+            return self.path_best_all
+        return self.best
 
     def valid_actions(self) -> list[Action]:
         return [a for a in ACTIONS if self.valid(a)]
@@ -203,6 +264,8 @@ class FitEnv:
             raise ValueError(f"invalid action {action}")
         phi = -self.episode.best_bic / len(self.q)
         self._apply(action)
+        if action != ("revert",):
+            self.state.origin = self.uid
         self.trace.append(action)
         if action[0] in LAYER_CHANGES:
             self.layer_changes += 1
@@ -265,7 +328,9 @@ class FitEnv:
                 s.stack = st.estimate_d(s.stack, self.q, self.y, self.scale)
                 return
             case ("revert",):
-                self.state = self.best.copy()
+                target = self._revert_target()
+                assert target is not None
+                self.state = target.copy()
                 return
             case ("stop",):
                 return
@@ -279,15 +344,16 @@ class FitEnv:
         return -self.held_out_deviance() / len(self.episode.q_ho)
 
     def held_out_deviance(self) -> float:
-        best = self.best.stack
-        lam = st.counts(best, self.episode.q_ho, self.scale)
+        lam = st.counts(self.returned().stack, self.episode.q_ho, self.scale)
         return st.deviance(lam, self.episode.y_ho)
 
     def result(self) -> dict:
-        """The returned model (lowest BIC visited) and the episode's cost."""
-        best = self.best.stack
-        n = len(self.q)
-        dev = st.deviance(st.counts(best, self.q, self.scale), self.y)
+        """The returned model, its fit quality on all training points, and the episode's cost.
+        `on_kept_path` and `kept_path_states` (L, training deviance) are X2d's instrumentation."""
+        state = self.returned()
+        best = state.stack
+        n = len(self.episode.q)
+        dev = st.deviance(st.counts(best, self.episode.q, self.scale), self.episode.y)
         out = {
             "layers": best.layers.tolist(),
             "instr": best.instr.tolist(),
@@ -299,6 +365,10 @@ class FitEnv:
             "jacobians": self.episode.jacobians,
             "actions": len(self.trace),
             "trace": [list(a) for a in self.trace],
+            "on_kept_path": state.origin in self.lineage,
+            "kept_path_states": [
+                [n_layers, d] for origin, n_layers, d in self.history if origin in self.lineage
+            ],
         }
         if self.episode.q_ho is not None:
             out["deviance_ho"] = self.held_out_deviance()

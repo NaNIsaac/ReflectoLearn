@@ -60,6 +60,17 @@ def q_grid() -> np.ndarray:
     return np.linspace(tth_to_q(0.2), tth_to_q(6.0), n)
 
 
+INNER_BLOCK = 4  # X2d A1v and Cv: the training block midway between held-out blocks 2 and 6
+
+
+def inner_mask(q: np.ndarray) -> np.ndarray:
+    """X2d's inner validation block on the full grid (block INNER_BLOCK of the held-out split)."""
+    above = np.flatnonzero(q >= tth_to_q(TTH_HELD_MIN))
+    inner = np.zeros(q.shape, bool)
+    inner[np.array_split(above, N_BLOCKS)[INNER_BLOCK]] = True
+    return inner
+
+
 def held_out_mask(q: np.ndarray) -> np.ndarray:
     """Contiguous held-out blocks (section 3.2): points above 2θ 0.5° in N_BLOCKS equal blocks,
     HELD_BLOCKS held out."""
@@ -332,9 +343,9 @@ def fringe_spectrum(
 
 
 # ------------------------------------------------------------------ registered data (section 3.1, 5.4)
-def sample_truth(n_layers: int, j: int) -> Stack:
+def sample_truth(n_layers: int, j: int, root: int = SEED) -> Stack:
     """Truth j of class n_layers; adjacent media differ by |delta rho| >= 4 (redrawn otherwise)."""
-    rng = np.random.default_rng((SEED, n_layers, j))
+    rng = np.random.default_rng((root, n_layers, j))
     while True:
         d = rng.uniform(20.0, 250.0, n_layers)
         sigma = rng.uniform(2.0, np.minimum(10.0, d / 4))
@@ -352,22 +363,24 @@ def sample_truth(n_layers: int, j: int) -> Stack:
     return Stack(np.column_stack([d, sigma, rho]), instr)
 
 
-def noisy_counts(lam: np.ndarray, n_layers: int, j: int, s: int, r: int = 0) -> np.ndarray:
+def noisy_counts(
+    lam: np.ndarray, n_layers: int, j: int, s: int, r: int = 0, root: int = SEED
+) -> np.ndarray:
     """Realisation r of truth (n_layers, j) at noise level s; r = 0 is the fitted one."""
-    return np.random.default_rng((SEED, n_layers, j, s, r)).poisson(lam).astype(float)
+    return np.random.default_rng((root, n_layers, j, s, r)).poisson(lam).astype(float)
 
 
 def _box(u: np.ndarray) -> np.ndarray:
     return START_BOX[:, 0] + u * (START_BOX[:, 1] - START_BOX[:, 0])
 
 
-def starts(n_layers: int, j: int) -> list[Stack]:
+def starts(n_layers: int, j: int, root: int = SEED) -> list[Stack]:
     """The N_STARTS one-layer starts of truth (n_layers, j) (amendment 1 seed)."""
-    u = qmc.LatinHypercube(d=3, rng=np.random.default_rng((SEED, n_layers, j, 2))).random(N_STARTS)
+    u = qmc.LatinHypercube(d=3, rng=np.random.default_rng((root, n_layers, j, 2))).random(N_STARTS)
     return [Stack(_box(row)[None, :], INSTR_START.copy()) for row in u]
 
 
-def extra_layers(n_layers: int, j: int) -> np.ndarray:
+def extra_layers(n_layers: int, j: int, root: int = SEED) -> np.ndarray:
     """(N_STARTS, 3, 3): the layers baseline C appends below start k for L = 2..4."""
-    u = qmc.LatinHypercube(d=3, rng=np.random.default_rng((SEED, n_layers, j, 1))).random(12)
+    u = qmc.LatinHypercube(d=3, rng=np.random.default_rng((root, n_layers, j, 1))).random(12)
     return _box(u).reshape(N_STARTS, 3, 3)
