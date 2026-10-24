@@ -1,0 +1,66 @@
+{
+ "index": 19,
+ "condition": {
+  "tth_max": 2.2,
+  "film_sld": 24.0,
+  "nuisance": "refine",
+  "stack": "bilayer"
+ },
+ "nuisance_basins": [],
+ "n_starts": 64,
+ "n_within_4": 1,
+ "modes": [
+  {
+   "deviance": 2.838995818264704e-07,
+   "start": 12,
+   "film": {
+    "thickness": 239.8923130531156,
+    "sld": 23.999993093530943,
+    "thickness2": 119.99994276727794,
+    "sld2": 30.00000121163045
+   },
+   "half_widths": {
+    "thickness": {
+     "half_width": 6.800947075055827,
+     "at_bound": false,
+     "lowest_dchi2": -2.814605580363928e-07
+    },
+    "sld": {
+     "half_width": 0.07364997880577308,
+     "at_bound": false,
+     "lowest_dchi2": 0.0
+    },
+    "thickness2": {
+     "half_width": 0.15374992667057485,
+     "at_bound": false,
+     "lowest_dchi2": 0.0
+    },
+    "sld2": {
+     "half_width": 0.06375000257471472,
+     "at_bound": false,
+     "lowest_dchi2": 0.0
+    }
+   },
+   "members": [
+    12
+   ]
+  }
+ ],
+ "labels": {
+  "thickness": "ridge",
+  "sld": "identifiable",
+  "thickness2": "identifiable",
+  "sld2": "identifiable"
+ },
+ "seeded": null,
+ "competitor": {
+  "deviance": 1472.8080664823417,
+  "film": {
+   "thickness": 202.61377476088353,
+   "sld": 21.822217189717065,
+   "thickness2": 120.28434105666804,
+   "sld2": 28.37064530305332
+  },
+  "s_star": 678.9750971342806
+ }
+}

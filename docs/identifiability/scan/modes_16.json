@@ -1,0 +1,64 @@
+{
+ "index": 16,
+ "condition": {
+  "tth_max": 6.0,
+  "film_sld": 24.0,
+  "nuisance": "wide",
+  "stack": "single"
+ },
+ "nuisance_basins": [],
+ "n_starts": 64,
+ "n_within_4": 16,
+ "modes": [
+  {
+   "deviance": 1.4918274921306146e-10,
+   "start": 31,
+   "film": {
+    "thickness": 239.99995940972906,
+    "sld": 23.99999997206921
+   },
+   "half_widths": {
+    "thickness": {
+     "half_width": 6.8039988492658185,
+     "at_bound": false,
+     "lowest_dchi2": 0.0
+    },
+    "sld": {
+     "half_width": 0.02984999996526108,
+     "at_bound": false,
+     "lowest_dchi2": 0.0
+    }
+   },
+   "members": [
+    31,
+    46,
+    34,
+    13,
+    48,
+    22,
+    23,
+    38,
+    25,
+    55,
+    62,
+    1,
+    59,
+    2,
+    60,
+    17
+   ]
+  }
+ ],
+ "labels": {
+  "thickness": "ridge",
+  "sld": "identifiable"
+ },
+ "competitor": {
+  "deviance": 11039.988463659447,
+  "film": {
+   "thickness": 261.3323235140721,
+   "sld": 7.906884130930147
+  },
+  "s_star": 90.57980479705392
+ }
+}

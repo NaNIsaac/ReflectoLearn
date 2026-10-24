@@ -1,0 +1,71 @@
+{
+ "index": 10,
+ "condition": {
+  "tth_max": 2.2,
+  "film_sld": 24.0,
+  "nuisance": "wide",
+  "stack": "single"
+ },
+ "nuisance_basins": [
+  {
+   "deviance": 5.619284999270123e-05,
+   "kalpha2_ratio": 0.485352677846018,
+   "oxide_thickness": 11.64465453572008,
+   "oxide_sld": 20.05757103916742
+  },
+  {
+   "deviance": 1.404011982575235,
+   "kalpha2_ratio": 1.916933314314023e-28,
+   "oxide_thickness": 1.4416924653355737e-37,
+   "oxide_sld": 8.232236379412177
+  }
+ ],
+ "n_starts": 64,
+ "n_within_4": 10,
+ "modes": [
+  {
+   "deviance": 9.60134557334507e-07,
+   "start": 46,
+   "film": {
+    "thickness": 239.7203005206217,
+    "sld": 24.000001583616974
+   },
+   "half_widths": {
+    "thickness": {
+     "half_width": 16.13317622503784,
+     "at_bound": false,
+     "lowest_dchi2": -8.699299782496596e-07
+    },
+    "sld": {
+     "half_width": 0.030450002009214036,
+     "at_bound": false,
+     "lowest_dchi2": 0.0
+    }
+   },
+   "members": [
+    46,
+    17,
+    26,
+    11,
+    31,
+    48,
+    44,
+    6,
+    47,
+    36
+   ]
+  }
+ ],
+ "labels": {
+  "thickness": "ridge",
+  "sld": "identifiable"
+ },
+ "competitor": {
+  "deviance": 8000.872159071785,
+  "film": {
+   "thickness": 249.36371387567237,
+   "sld": 8.835772444335236
+  },
+  "s_star": 124.9863740000083
+ }
+}
