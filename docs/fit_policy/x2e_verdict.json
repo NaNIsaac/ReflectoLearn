@@ -1,0 +1,444 @@
+{
+ "summary": {
+  "commit": "e1b15accdc130aaa6a91e4263c53edaa864e30e6",
+  "basin_reading_D1": "supported",
+  "sources": {
+   "B1": "unresolved",
+   "B2": "unresolved",
+   "B3": "refuted"
+  },
+  "cause": null,
+  "D3": "points to the start values at a fixed L",
+  "S12_beats_C_cells": 0,
+  "S12_attributable_cells": 0,
+  "random_floor_cells": 4,
+  "verdict": "fail",
+  "A1_vs_C_cells_beaten (third X2b sample)": 1
+ },
+ "D1": {
+  "counted": 53,
+  "frac_within_margin": 0.0,
+  "basin_reading": "supported"
+ },
+ "sources": {
+  "B1": {
+   "sign_tests": {
+    "n2_s0": {
+     "for": 5,
+     "against": 0,
+     "p": 0.03125,
+     "holds": false
+    },
+    "n2_s1": {
+     "for": 6,
+     "against": 2,
+     "p": 0.14453125,
+     "holds": false
+    },
+    "n3_s0": {
+     "for": 1,
+     "against": 1,
+     "p": 0.75,
+     "holds": false
+    },
+    "n3_s1": {
+     "for": 1,
+     "against": 1,
+     "p": 0.75,
+     "holds": false
+    }
+   },
+   "frac_gap_within_margin": 0.11320754716981132,
+   "counted": 53,
+   "exposure": 0.86875,
+   "exhausted_frac": 0.0,
+   "grade": "unresolved"
+  },
+  "B2": {
+   "sign_tests": {
+    "n2_s0": {
+     "for": 0,
+     "against": 5,
+     "p": 1.0,
+     "holds": false
+    },
+    "n2_s1": {
+     "for": 1,
+     "against": 7,
+     "p": 0.99609375,
+     "holds": false
+    },
+    "n3_s0": {
+     "for": 1,
+     "against": 2,
+     "p": 0.875,
+     "holds": false
+    },
+    "n3_s1": {
+     "for": 1,
+     "against": 1,
+     "p": 0.75,
+     "holds": false
+    }
+   },
+   "frac_gap_within_margin": 0.14583333333333334,
+   "counted": 48,
+   "exposure": 0.84765625,
+   "exhausted_frac": 0.0,
+   "grade": "unresolved"
+  },
+  "B3": {
+   "truths_where_D1_stays_out": 53,
+   "frac_D2_within_margin": 0.09433962264150944,
+   "grade": "refuted"
+  }
+ },
+ "D3": {
+  "E_D3": {
+   "n2_s0": 10,
+   "n2_s1": 11,
+   "n3_s0": 13,
+   "n3_s1": 15
+  },
+  "reading": "points to the start values at a fixed L"
+ },
+ "primary": {
+  "n2_s0": {
+   "vs_C": {
+    "truths": 16,
+    "bic_wins": 14,
+    "bic_losses": 1,
+    "bic_ties": 1,
+    "sign_p": 0.00048828125,
+    "ho_wins": 12,
+    "ho_losses": 3,
+    "beats": false,
+    "episodes": 64,
+    "episode_bic_wins": 49,
+    "episode_bic_wins_same_L": 26
+   },
+   "beats_C": false,
+   "overshoot_vs_A1": {
+    "for": 2,
+    "against": 6,
+    "p": 0.96484375,
+    "holds": false
+   },
+   "attributable": false
+  },
+  "n2_s1": {
+   "vs_C": {
+    "truths": 16,
+    "bic_wins": 14,
+    "bic_losses": 2,
+    "bic_ties": 0,
+    "sign_p": 0.0020904541015625,
+    "ho_wins": 13,
+    "ho_losses": 2,
+    "beats": false,
+    "episodes": 64,
+    "episode_bic_wins": 46,
+    "episode_bic_wins_same_L": 16
+   },
+   "beats_C": false,
+   "overshoot_vs_A1": {
+    "for": 4,
+    "against": 5,
+    "p": 0.74609375,
+    "holds": false
+   },
+   "attributable": false
+  },
+  "n3_s0": {
+   "vs_C": {
+    "truths": 16,
+    "bic_wins": 13,
+    "bic_losses": 3,
+    "bic_ties": 0,
+    "sign_p": 0.0106353759765625,
+    "ho_wins": 12,
+    "ho_losses": 4,
+    "beats": false,
+    "episodes": 64,
+    "episode_bic_wins": 48,
+    "episode_bic_wins_same_L": 32
+   },
+   "beats_C": false,
+   "overshoot_vs_A1": {
+    "for": 1,
+    "against": 2,
+    "p": 0.875,
+    "holds": false
+   },
+   "attributable": false
+  },
+  "n3_s1": {
+   "vs_C": {
+    "truths": 16,
+    "bic_wins": 16,
+    "bic_losses": 0,
+    "bic_ties": 0,
+    "sign_p": 1.52587890625e-05,
+    "ho_wins": 13,
+    "ho_losses": 3,
+    "beats": false,
+    "episodes": 64,
+    "episode_bic_wins": 48,
+    "episode_bic_wins_same_L": 35
+   },
+   "beats_C": false,
+   "overshoot_vs_A1": {
+    "for": 1,
+    "against": 1,
+    "p": 0.75,
+    "holds": false
+   },
+   "attributable": false
+  }
+ },
+ "secondary": {
+  "S1": {
+   "n2_s0": {
+    "vs_C": {
+     "truths": 16,
+     "bic_wins": 15,
+     "bic_losses": 1,
+     "bic_ties": 0,
+     "sign_p": 0.0002593994140625,
+     "ho_wins": 12,
+     "ho_losses": 2,
+     "beats": false,
+     "episodes": 64,
+     "episode_bic_wins": 56,
+     "episode_bic_wins_same_L": 18
+    },
+    "beats_C": false,
+    "overshoot_vs_A1": {
+     "for": 5,
+     "against": 0,
+     "p": 0.03125,
+     "holds": false
+    },
+    "attributable": false
+   },
+   "n2_s1": {
+    "vs_C": {
+     "truths": 16,
+     "bic_wins": 16,
+     "bic_losses": 0,
+     "bic_ties": 0,
+     "sign_p": 1.52587890625e-05,
+     "ho_wins": 14,
+     "ho_losses": 2,
+     "beats": false,
+     "episodes": 64,
+     "episode_bic_wins": 59,
+     "episode_bic_wins_same_L": 20
+    },
+    "beats_C": false,
+    "overshoot_vs_A1": {
+     "for": 6,
+     "against": 2,
+     "p": 0.14453125,
+     "holds": false
+    },
+    "attributable": false
+   },
+   "n3_s0": {
+    "vs_C": {
+     "truths": 16,
+     "bic_wins": 15,
+     "bic_losses": 1,
+     "bic_ties": 0,
+     "sign_p": 0.0002593994140625,
+     "ho_wins": 9,
+     "ho_losses": 7,
+     "beats": false,
+     "episodes": 64,
+     "episode_bic_wins": 55,
+     "episode_bic_wins_same_L": 33
+    },
+    "beats_C": false,
+    "overshoot_vs_A1": {
+     "for": 1,
+     "against": 1,
+     "p": 0.75,
+     "holds": false
+    },
+    "attributable": false
+   },
+   "n3_s1": {
+    "vs_C": {
+     "truths": 16,
+     "bic_wins": 14,
+     "bic_losses": 2,
+     "bic_ties": 0,
+     "sign_p": 0.0020904541015625,
+     "ho_wins": 11,
+     "ho_losses": 5,
+     "beats": false,
+     "episodes": 64,
+     "episode_bic_wins": 54,
+     "episode_bic_wins_same_L": 36
+    },
+    "beats_C": false,
+    "overshoot_vs_A1": {
+     "for": 1,
+     "against": 1,
+     "p": 0.75,
+     "holds": false
+    },
+    "attributable": false
+   }
+  },
+  "S2": {
+   "n2_s0": {
+    "vs_C": {
+     "truths": 16,
+     "bic_wins": 14,
+     "bic_losses": 1,
+     "bic_ties": 1,
+     "sign_p": 0.00048828125,
+     "ho_wins": 13,
+     "ho_losses": 2,
+     "beats": false,
+     "episodes": 64,
+     "episode_bic_wins": 45,
+     "episode_bic_wins_same_L": 26
+    },
+    "beats_C": false,
+    "overshoot_vs_A1": {
+     "for": 0,
+     "against": 5,
+     "p": 1.0,
+     "holds": false
+    },
+    "attributable": false
+   },
+   "n2_s1": {
+    "vs_C": {
+     "truths": 16,
+     "bic_wins": 14,
+     "bic_losses": 2,
+     "bic_ties": 0,
+     "sign_p": 0.0020904541015625,
+     "ho_wins": 11,
+     "ho_losses": 3,
+     "beats": false,
+     "episodes": 64,
+     "episode_bic_wins": 47,
+     "episode_bic_wins_same_L": 22
+    },
+    "beats_C": false,
+    "overshoot_vs_A1": {
+     "for": 1,
+     "against": 7,
+     "p": 0.99609375,
+     "holds": false
+    },
+    "attributable": false
+   },
+   "n3_s0": {
+    "vs_C": {
+     "truths": 16,
+     "bic_wins": 13,
+     "bic_losses": 3,
+     "bic_ties": 0,
+     "sign_p": 0.0106353759765625,
+     "ho_wins": 12,
+     "ho_losses": 4,
+     "beats": false,
+     "episodes": 64,
+     "episode_bic_wins": 48,
+     "episode_bic_wins_same_L": 34
+    },
+    "beats_C": false,
+    "overshoot_vs_A1": {
+     "for": 1,
+     "against": 2,
+     "p": 0.875,
+     "holds": false
+    },
+    "attributable": false
+   },
+   "n3_s1": {
+    "vs_C": {
+     "truths": 16,
+     "bic_wins": 15,
+     "bic_losses": 1,
+     "bic_ties": 0,
+     "sign_p": 0.0002593994140625,
+     "ho_wins": 11,
+     "ho_losses": 5,
+     "beats": false,
+     "episodes": 64,
+     "episode_bic_wins": 44,
+     "episode_bic_wins_same_L": 33
+    },
+    "beats_C": false,
+    "overshoot_vs_A1": {
+     "for": 1,
+     "against": 1,
+     "p": 0.75,
+     "holds": false
+    },
+    "attributable": false
+   }
+  }
+ },
+ "reward_alignment": {},
+ "A1_vs_C": {
+  "n2_s0": {
+   "truths": 16,
+   "bic_wins": 12,
+   "bic_losses": 2,
+   "bic_ties": 2,
+   "sign_p": 0.0064697265625,
+   "ho_wins": 13,
+   "ho_losses": 1,
+   "beats": true,
+   "episodes": 64,
+   "episode_bic_wins": 49,
+   "episode_bic_wins_same_L": 22
+  },
+  "n2_s1": {
+   "truths": 16,
+   "bic_wins": 13,
+   "bic_losses": 3,
+   "bic_ties": 0,
+   "sign_p": 0.0106353759765625,
+   "ho_wins": 14,
+   "ho_losses": 2,
+   "beats": false,
+   "episodes": 64,
+   "episode_bic_wins": 49,
+   "episode_bic_wins_same_L": 17
+  },
+  "n3_s0": {
+   "truths": 16,
+   "bic_wins": 15,
+   "bic_losses": 1,
+   "bic_ties": 0,
+   "sign_p": 0.0002593994140625,
+   "ho_wins": 11,
+   "ho_losses": 5,
+   "beats": false,
+   "episodes": 64,
+   "episode_bic_wins": 54,
+   "episode_bic_wins_same_L": 34
+  },
+  "n3_s1": {
+   "truths": 16,
+   "bic_wins": 13,
+   "bic_losses": 3,
+   "bic_ties": 0,
+   "sign_p": 0.0106353759765625,
+   "ho_wins": 9,
+   "ho_losses": 7,
+   "beats": false,
+   "episodes": 64,
+   "episode_bic_wins": 48,
+   "episode_bic_wins_same_L": 33
+  }
+ }
+}

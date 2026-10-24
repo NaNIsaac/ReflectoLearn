@@ -7,6 +7,7 @@ from types import SimpleNamespace
 
 import numpy as np
 import torch
+from scipy.optimize import differential_evolution
 
 from reflectolearn.fit_policy import stack as st
 from reflectolearn.fit_policy.env import BUDGET, FitEnv
@@ -76,6 +77,140 @@ def full_fit(
 def data_start(start: Stack, q: np.ndarray, y: np.ndarray, scale: float) -> Stack:
     """A one-layer start after A1 steps 2–3, as C and C_oracle use it (amendment 3)."""
     return st.estimate_d(st.estimate_rho(start, q, y), q, y, scale)
+
+
+CV_FINAL_FIT = 100
+
+
+def inner_full_fit(
+    start: Stack,
+    extra: np.ndarray,
+    q: np.ndarray,
+    y: np.ndarray,
+    scale: float,
+    fit_mask: np.ndarray,
+    *,
+    q_ho=None,
+    y_ho=None,
+    budget: int = BUDGET,
+) -> dict:
+    """Cv (X2D.md section 4, amendment 1b and 1h): C on the training points outside the inner
+    block, start estimates included, with (budget - 100) / L_MAX evaluations per L; the L with the
+    lowest inner-block deviance is refit on all training points with one Poisson fit(100), A1v's
+    step-9 refit, and returned."""
+    qf, yf = q[fit_mask], y[fit_mask]
+    top = data_start(start, qf, yf, scale)
+    per_l = (budget - CV_FINAL_FIT) // L_MAX
+    fits = []
+    for L in range(1, L_MAX + 1):
+        stack = Stack(np.vstack([top.layers, extra[: L - 1]]), top.instr.copy())
+        fits.append(st.fit(stack, np.ones(stack.n_params, bool), qf, yf, scale, "poisson", per_l))
+    inner = [st.deviance(st.counts(f[0], q[~fit_mask], scale), y[~fit_mask]) for f in fits]
+    chosen = int(np.argmin(inner))
+    final = st.fit(
+        fits[chosen][0],
+        np.ones(fits[chosen][0].n_params, bool),
+        q,
+        y,
+        scale,
+        "poisson",
+        CV_FINAL_FIT,
+    )
+    return _score(final[0], q, y, scale, q_ho, y_ho) | {
+        "evaluations": sum(f[1] for f in fits) + final[1],
+        "jacobians": sum(f[2] for f in fits) + final[2],
+        "capped": fits[chosen][3] == 0,
+        "capped_by_L": [f[3] == 0 for f in fits],
+        "inner_by_L": inner,
+    }
+
+
+def step3_state(start: Stack, q: np.ndarray, y: np.ndarray, scale: float) -> Stack:
+    """A1's state after steps 1–3 from `start` (X2e's data values for D2 and D3); its evaluations
+    are not charged to any arm."""
+    env = FitEnv(q, y, scale, start)
+    for action in [("open", "bkg"), ("fit", 20), ("estimate_rho",), ("estimate_d",)]:
+        if env.valid(action):
+            env.step(action)
+    return env.state.stack
+
+
+def true_l_data_start(step3: Stack, n_layers: int) -> Stack:
+    """X2E.md 4.4: the step-3 thickness split into n_layers equal layers; top rho and sigma from the
+    step-3 state, each deeper rho the mean of the one above and the substrate's, sigma 3 Å below."""
+    d = np.full(n_layers, step3.layers[0, 0] / n_layers)
+    rho = [step3.layers[0, 2]]
+    for _ in range(n_layers - 1):
+        rho.append(0.5 * (rho[-1] + st.SUB_SLD))
+    sigma = [step3.layers[0, 1], *[3.0] * (n_layers - 1)]
+    return Stack(np.column_stack([d, sigma, rho]), step3.instr.copy()).clipped()
+
+
+def free_fit_deviance(stack: Stack, q, y, scale: float, budget: int = BUDGET) -> tuple[float, int]:
+    """D1: one fit from `stack` with every parameter free, Poisson loss, max_nfev = budget. Returns
+    the training deviance and the evaluations used."""
+    fitted, nfev, _, _ = st.fit(
+        stack, np.ones(stack.n_params, bool), q, y, scale, "poisson", budget
+    )
+    return st.deviance(st.counts(fitted, q, scale), y), nfev
+
+
+DE_POPSIZE, DE_MAXITER = 15, 50
+
+
+def de_fit(
+    start: Stack, q: np.ndarray, y: np.ndarray, scale: float, seed: tuple, *, q_ho=None, y_ho=None
+) -> dict:
+    """D2 (X2E.md 4.4): differential evolution over every parameter of `start` within the fit
+    bounds on the training Poisson deviance (popsize 15, maxiter 50, Latin hypercube with `start`
+    as x0, no polish), then one Poisson fit(100) with every parameter free."""
+    lo, hi = start.bounds()
+
+    def objective(x: np.ndarray) -> float:
+        d = st.deviance(st.counts(start.with_vector(x), q, scale), y)
+        return d if np.isfinite(d) else 1e300
+
+    res = differential_evolution(
+        objective,
+        list(zip(lo, hi, strict=True)),
+        popsize=DE_POPSIZE,
+        maxiter=DE_MAXITER,
+        init="latinhypercube",
+        x0=np.clip(start.vector(), lo, hi),
+        polish=False,
+        rng=np.random.default_rng(seed),
+    )
+    fitted, nfev, njev, status = st.fit(
+        start.with_vector(res.x), np.ones(start.n_params, bool), q, y, scale, "poisson", 100
+    )
+    return _score(fitted, q, y, scale, q_ho, y_ho) | {
+        "evaluations": int(res.nfev) + nfev,
+        "de_evaluations": int(res.nfev),
+        "jacobians": njev,
+        "capped": status == 0,
+    }
+
+
+def truth_fit(
+    truth: Stack,
+    q: np.ndarray,
+    y: np.ndarray,
+    scale: float,
+    *,
+    q_ho=None,
+    y_ho=None,
+    budget: int = BUDGET,
+) -> dict:
+    """TF (X2D.md section 4, diagnostic): the truth as the start, every parameter free, Poisson,
+    one fit with max_nfev = budget, the fit returned."""
+    fitted, nfev, njev, status = st.fit(
+        truth, np.ones(truth.n_params, bool), q, y, scale, "poisson", budget
+    )
+    return _score(fitted, q, y, scale, q_ho, y_ho) | {
+        "evaluations": nfev,
+        "jacobians": njev,
+        "capped": status == 0,
+    }
 
 
 def oracle_fit(

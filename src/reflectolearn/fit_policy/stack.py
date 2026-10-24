@@ -60,6 +60,17 @@ def q_grid() -> np.ndarray:
     return np.linspace(tth_to_q(0.2), tth_to_q(6.0), n)
 
 
+INNER_BLOCK = 4  # X2d A1v and Cv: the training block midway between held-out blocks 2 and 6
+
+
+def inner_mask(q: np.ndarray) -> np.ndarray:
+    """X2d's inner validation block on the full grid (block INNER_BLOCK of the held-out split)."""
+    above = np.flatnonzero(q >= tth_to_q(TTH_HELD_MIN))
+    inner = np.zeros(q.shape, bool)
+    inner[np.array_split(above, N_BLOCKS)[INNER_BLOCK]] = True
+    return inner
+
+
 def held_out_mask(q: np.ndarray) -> np.ndarray:
     """Contiguous held-out blocks (section 3.2): points above 2θ 0.5° in N_BLOCKS equal blocks,
     HELD_BLOCKS held out."""
@@ -139,8 +150,12 @@ def counts(stack: Stack, q: np.ndarray, scale: float) -> np.ndarray:
 
 # ------------------------------------------------------------------ fit quality
 def deviance_terms(lam: np.ndarray, y: np.ndarray) -> np.ndarray:
-    """Poisson deviance per point, zero counts included."""
-    return 2.0 * (lam - y + xlogy(y, y / lam))
+    """Poisson deviance per point, zero counts included.
+
+    Clamped at 0, its exact lower bound: for lam within ~1e-8 (relative) of y, rounding leaves an
+    error of order y * 1e-16 that can be negative, and the Poisson residual's sqrt would be NaN (#43).
+    """
+    return np.maximum(2.0 * (lam - y + xlogy(y, y / lam)), 0.0)
 
 
 def deviance(lam: np.ndarray, y: np.ndarray) -> float:
@@ -331,10 +346,43 @@ def fringe_spectrum(
     return float(z[1:-1][i]), float(amp[1:-1][i] / max(np.abs(vv).sum(), 1e-12))
 
 
+PEAK_REL = 0.25  # X2e 4.2: a peak needs this fraction of the largest one
+PEAK_MAX = 4
+
+
+def fringe_peaks(
+    q: np.ndarray, values: np.ndarray, q_min: float, z: np.ndarray, k: int = PEAK_MAX
+) -> list[float]:
+    """X2e's peak rule (X2E.md 4.2) on `fringe_spectrum`'s transform: local maxima with at least
+    PEAK_REL of the largest one, taken in decreasing amplitude and kept if at least
+    2 pi / (q_max - q_min) from every peak already kept, at most k. Returns their z, strongest
+    first (so the first is `fringe_spectrum`'s peak); [] with fewer than 40 points or no maximum."""
+    keep = q > q_min
+    if keep.sum() < 40:
+        return []
+    qq, vv = q[keep], values[keep]
+    vv = vv - np.polyval(np.polyfit(qq, vv, 5), qq)
+    vv = vv * np.hanning(vv.size)
+    amp = np.abs(np.exp(-1j * np.outer(z, qq)) @ vv)
+    inner = np.flatnonzero((amp[1:-1] > amp[:-2]) & (amp[1:-1] >= amp[2:])) + 1
+    if inner.size == 0:
+        return []
+    inner = inner[np.argsort(-amp[inner], kind="stable")]
+    floor = PEAK_REL * amp[inner[0]]
+    separation = 2 * np.pi / (qq.max() - qq.min())
+    kept: list[float] = []
+    for i in inner:
+        if amp[i] < floor or len(kept) == k:
+            break
+        if all(abs(z[i] - zk) >= separation for zk in kept):
+            kept.append(float(z[i]))
+    return kept
+
+
 # ------------------------------------------------------------------ registered data (section 3.1, 5.4)
-def sample_truth(n_layers: int, j: int) -> Stack:
+def sample_truth(n_layers: int, j: int, root: int = SEED) -> Stack:
     """Truth j of class n_layers; adjacent media differ by |delta rho| >= 4 (redrawn otherwise)."""
-    rng = np.random.default_rng((SEED, n_layers, j))
+    rng = np.random.default_rng((root, n_layers, j))
     while True:
         d = rng.uniform(20.0, 250.0, n_layers)
         sigma = rng.uniform(2.0, np.minimum(10.0, d / 4))
@@ -352,22 +400,24 @@ def sample_truth(n_layers: int, j: int) -> Stack:
     return Stack(np.column_stack([d, sigma, rho]), instr)
 
 
-def noisy_counts(lam: np.ndarray, n_layers: int, j: int, s: int, r: int = 0) -> np.ndarray:
+def noisy_counts(
+    lam: np.ndarray, n_layers: int, j: int, s: int, r: int = 0, root: int = SEED
+) -> np.ndarray:
     """Realisation r of truth (n_layers, j) at noise level s; r = 0 is the fitted one."""
-    return np.random.default_rng((SEED, n_layers, j, s, r)).poisson(lam).astype(float)
+    return np.random.default_rng((root, n_layers, j, s, r)).poisson(lam).astype(float)
 
 
 def _box(u: np.ndarray) -> np.ndarray:
     return START_BOX[:, 0] + u * (START_BOX[:, 1] - START_BOX[:, 0])
 
 
-def starts(n_layers: int, j: int) -> list[Stack]:
+def starts(n_layers: int, j: int, root: int = SEED) -> list[Stack]:
     """The N_STARTS one-layer starts of truth (n_layers, j) (amendment 1 seed)."""
-    u = qmc.LatinHypercube(d=3, rng=np.random.default_rng((SEED, n_layers, j, 2))).random(N_STARTS)
+    u = qmc.LatinHypercube(d=3, rng=np.random.default_rng((root, n_layers, j, 2))).random(N_STARTS)
     return [Stack(_box(row)[None, :], INSTR_START.copy()) for row in u]
 
 
-def extra_layers(n_layers: int, j: int) -> np.ndarray:
+def extra_layers(n_layers: int, j: int, root: int = SEED) -> np.ndarray:
     """(N_STARTS, 3, 3): the layers baseline C appends below start k for L = 2..4."""
-    u = qmc.LatinHypercube(d=3, rng=np.random.default_rng((SEED, n_layers, j, 1))).random(12)
+    u = qmc.LatinHypercube(d=3, rng=np.random.default_rng((root, n_layers, j, 1))).random(12)
     return _box(u).reshape(N_STARTS, 3, 3)
